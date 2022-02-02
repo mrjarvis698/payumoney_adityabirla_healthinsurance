@@ -19,7 +19,7 @@ def clearConsole():
     if os.name in ('nt', 'dos'):  # If Machine is running on Windows, use cls
         command = 'cls'
     os.system(command)
-#os.system('mode con: cols=65 lines=15')
+os.system('mode con: cols=65 lines=15')
 
 appdata_path = os.getenv('APPDATA')
 # License
@@ -208,7 +208,7 @@ if license_verify == True:
         warnings.filterwarnings("ignore", category=DeprecationWarning)
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument("--incognito")
-        #chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--headless")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--window-size=500,1080")
         chrome_options.add_argument("--no-sandbox")
