@@ -11,6 +11,7 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, NoSuchFrameException, NoSuchWindowException, UnexpectedAlertPresentException, WebDriverException, NoSuchWindowException, ElementClickInterceptedException
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.alert import Alert
+from selenium.webdriver.common.keys import Keys
 import getpass
 
 def clearConsole():
@@ -107,10 +108,6 @@ if license_verify == True:
         json_object = json.dumps(dictionary, indent = 1)
         with open("zaggle_cache/opened_sheet.json", "w") as outfile:
             outfile.write(json_object)
-    
-    # Opening JSON file & returns JSON object as a dictionary
-    json_file = open('settings.json')
-    settings_data = json.load(json_file)
 
     # read imported xlsx file path using pandas
     input_workbook = pd.read_excel(xlsx_file_path, sheet_name = 'Sheet1', dtype=str)
@@ -210,29 +207,28 @@ if license_verify == True:
         transactions_continue()
         warnings.filterwarnings("ignore", category=DeprecationWarning)
         chrome_options = webdriver.ChromeOptions()
-        #chrome_options.add_argument("--incognito")
+        chrome_options.add_argument("--incognito")
         #chrome_options.add_argument("--headless")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--window-size=500,1080")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-crash-reporter")
-        #chrome_options.add_argument("--disable-extensions")
+        chrome_options.add_argument("--disable-extensions")
         chrome_options.add_argument("--disable-in-process-stack-traces")
         chrome_options.add_argument("--disable-logging")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--log-level=3")
         chrome_options.add_argument("--output=/dev/null")
-        chrome_options.add_extension("driver/buster.crx")
-        #chrome_options.add_argument('--user-data-dir=Extension_profile')
         executable_path = Service('driver/chromedriver.exe')
         driver = webdriver.Chrome(options=chrome_options, service=executable_path)
         driver.implicitly_wait(3)
 
     def main():
-        global skip, transaction_status, transaction_id, captcha_failed
+        global skip, transaction_status, transaction_id, captcha_failed, transaction_failed
         driver.switch_to.window(driver.window_handles[0])
         skip = False
         captcha_failed = False
+        transaction_failed = False
         cc_number()
         cc_expiry()
         try:
@@ -389,188 +385,74 @@ if license_verify == True:
                 else:
                     skip = False
                     driver.find_element(By.ID, "cardOwnerName").send_keys(input_xlsx_col_A[i])
+                    driver.find_element(By.ID, "cardOwnerName").send_keys(Keys.RETURN)
             else :
                 transaction_status = "Null"
                 transaction_id = "-"
 
             if skip == False:
-                try:
-                    driver.switch_to.frame(0)
-                except NoSuchFrameException:
-                    skip = True
-            else :
-                transaction_status = "Null"
-                transaction_id = "-"
-
-            if skip == False:
-                try:
-                    driver.find_element(By.XPATH, "//div[@id='rc-anchor-container']/div[3]/div/div/div")
-                except NoSuchElementException:
-                    skip = True
-                else:
-                    skip = False
-                    driver.find_element(By.XPATH, "//div[@id='rc-anchor-container']/div[3]/div/div/div").click()
-            else :
-                transaction_status = 'Null'
-                transaction_id = "-"
-
-            if skip == False:
-                try:
-                    driver.switch_to.parent_frame()
-                except NoSuchFrameException:
-                    skip = True
-            else :
-                transaction_status = "Null"
-                transaction_id = "-"
-
-            if skip == False:
-                try:
-                    driver.switch_to.frame(2)
-                except NoSuchFrameException:
-                    skip = True
-            else :
-                transaction_status = "Null"
-                transaction_id = "-"
-
-            if skip == False:
-                try:
-                    driver.find_element(By.XPATH, "//div[@id='rc-imageselect']/div[3]/div[2]/div/div/div[4]")
-                except NoSuchElementException:
-                    skip = True
-                else:
-                    skip = False
-                    driver.find_element(By.XPATH, "//div[@id='rc-imageselect']/div[3]/div[2]/div/div/div[4]").click()
-                    time.sleep(5)
-            else :
-                transaction_status = "Null"
-                transaction_id = "-"
-
-            if skip == False:
-                try:
-                    driver.switch_to.parent_frame()
-                except NoSuchFrameException:
-                    skip = True
-            else :
-                transaction_status = "Null"
-                transaction_id = "-"
-
-            if skip == False:
-                try:
-                    driver.find_element(By.XPATH, "//form[@id='Cardform']/button/div/span")
-                except NoSuchElementException:
-                        skip = True
-                else:
-                    skip = False
-                    try:
-                        driver.find_element(By.XPATH, "//form[@id='Cardform']/button/div/span").click()
-                    except ElementClickInterceptedException:
-                        captcha_failed = True
-                        if skip == False:
-                            try:
-                                driver.switch_to.parent_frame()
-                            except NoSuchFrameException:
-                                skip = True
-                        else :
-                            transaction_status = "Null"
-                            transaction_id = "-"
-
-                        if skip == False:
-                            try:
-                                driver.switch_to.frame(2)
-                            except NoSuchFrameException:
-                                skip = True
-                        else :
-                            transaction_status = "Null"
-                            transaction_id = "-"
-
-                        if skip == False:
-                            try:
-                                driver.find_element(By.ID, "recaptcha-reload-button")
-                            except NoSuchElementException:
-                                skip = True
-                            else:
-                                skip = False
-                                driver.find_element(By.ID, "recaptcha-reload-button").click()
-                        else :
-                            transaction_status = "Null"
-                            transaction_id = "-"
-
-                        if skip == False:
-                            try:
-                                driver.find_element(By.XPATH, "//div[@id='rc-imageselect']/div[3]/div[2]/div/div/div[4]")
-                            except NoSuchElementException:
-                                skip = True
-                            else:
-                                skip = False
-                                driver.find_element(By.XPATH, "//div[@id='rc-imageselect']/div[3]/div[2]/div/div/div[4]").click()
-                                time.sleep(5)
-                        else :
-                            transaction_status = "Null"
-                            transaction_id = "-"
-            else :
-                transaction_status = 'Null'
-                transaction_id = "-"
-
-            if captcha_failed == True:
-                try:
-                    driver.find_element(By.XPATH, "//form[@id='Cardform']/button/div/span")
-                except (NoSuchElementException, ElementClickInterceptedException):
-                    skip = True
-                else:
-                    skip = False
-                    driver.find_element(By.XPATH, "//form[@id='Cardform']/button/div/span").click()
-            else :
-                transaction_status = 'Null'
-                transaction_id = "-"
-
-            if skip == False:
-                time.sleep(7)
                 try:
                     driver.find_element(By.ID, "ipin")
                 except NoSuchElementException:
-                    skip = True
+                    skip = False
+                    try :
+                        driver.find_element(By.XPATH, "//div[@id='app']/div/div[2]/div[2]/div[2]/div/div/span")
+                    except NoSuchElementException:
+                        skip = True
+                        transaction_status = 'Null'
+                        transaction_id = "-"
+                    else:
+                        skip = False
+                        transaction_text = driver.find_element(By.XPATH, "//div[@id='app']/div/div[2]/div[2]/div[2]/div/div/span").text
+                        if transaction_text == "Reason of Failure : Payment could not be processed, Try again.":
+                            transaction_status = "Failed"
+                        transaction_id = "-"
+                        transaction_failed = True
+                    
                 else:
                     skip = False
                     driver.find_element(By.ID, "ipin").send_keys(input_xlsx_col_F[i])
             else :
                 transaction_status = 'Null'
                 transaction_id = "-"
-
-            if skip == False:
-                try:
-                    driver.find_element(By.ID, "otpbut")
-                except NoSuchElementException:
-                    skip = True
-                else:
-                    skip = False
-                    driver.find_element(By.ID, "otpbut").click()
-            else :
-                transaction_status = 'Null'
-                transaction_id = "-"
-            #time.sleep(7000)
-            if skip == False:
-                try:
-                    driver.find_element(By.XPATH, "(.//*[normalize-space(text()) and normalize-space(.)='Aditya Birla Health Insurance Company Limited'])[1]/following::h3[1]")
-                except NoSuchElementException:
+            
+            if skip == False and transaction_failed == False:
+                if skip == False:
                     try:
-                        driver.find_element(By.XPATH,"//*[@id='set']/div/div/div[2]/div/div[3]/font")
+                        driver.find_element(By.ID, "otpbut")
                     except NoSuchElementException:
-                        transaction_status = "Failed"
-                        transaction_id = "-"
+                        skip = True
                     else:
                         skip = False
-                        transaction_status = "Incorrect Ipin"
-                        transaction_id = "-"
-                else:
-                    transaction_status = driver.find_element(By.XPATH,"(.//*[normalize-space(text()) and normalize-space(.)='Aditya Birla Health Insurance Company Limited'])[1]/following::h3[1]").text
-                    transaction_id = driver.find_element(By.XPATH,"(.//*[normalize-space(text()) and normalize-space(.)='Your transaction has been successfully done'])[1]/following::i[1]").text
-            else :
-                transaction_status = 'Null'
-                transaction_id = "-"
+                        driver.find_element(By.ID, "otpbut").click()
+                else :
+                    transaction_status = 'Null'
+                    transaction_id = "-"
+
+                if skip == False:
+                    try:
+                        driver.find_element(By.XPATH, "(.//*[normalize-space(text()) and normalize-space(.)='Aditya Birla Health Insurance Company Limited'])[1]/following::h3[1]")
+                    except NoSuchElementException:
+                        try:
+                            driver.find_element(By.XPATH,"//*[@id='set']/div/div/div[2]/div/div[3]/font")
+                        except NoSuchElementException:
+                            transaction_status = "Failed"
+                            transaction_id = "-"
+                        else:
+                            skip = False
+                            transaction_status = "Incorrect Ipin"
+                            transaction_id = "-"
+                    else:
+                        transaction_status = driver.find_element(By.XPATH,"(.//*[normalize-space(text()) and normalize-space(.)='Aditya Birla Health Insurance Company Limited'])[1]/following::h3[1]").text
+                        transaction_id = driver.find_element(By.XPATH,"(.//*[normalize-space(text()) and normalize-space(.)='Your transaction has been successfully done'])[1]/following::i[1]").text
+                else :
+                    transaction_status = 'Null'
+                    transaction_id = "-"
+
 
     setUp()
     for i in range (card_iteration , total_input_rows):
-        for j in range (transaction_iteration, int(settings_data['number_of_time_transactions_per_card'])):
+        for j in range (transaction_iteration, 4):
             main()
             output_save()
         transaction_iteration = 0
